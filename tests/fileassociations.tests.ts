@@ -90,7 +90,7 @@ suite('file associations', () => {
 
 	test('fix: our extensions leave a glob of several extensions', () => {
 		const user = {[NASM_GLOB]: 'asm-x86-nasm', '*.css': 'css'};
-		const conflicts = findConflictingAssociations(user, sources, listings, []);
+		const conflicts = findConflictingAssociations(user, sources, listings, ['asm-x86-nasm', 'css']);
 		assert.deepEqual(fixAssociations(user, conflicts, [], false), {
 			'*.css': 'css',
 			'*.{s,nasm,yasm,-----------------------------------------}': 'asm-x86-nasm',
@@ -101,10 +101,20 @@ suite('file associations', () => {
 		assert.equal(fixAssociations({'*.css': 'css'}, conflicts, [], false), undefined);
 		// Only ours in it: removed
 		const only = {'**/*.{ASM,inc}': 'z80-macroasm'};
-		assert.deepEqual(fixAssociations(only, findConflictingAssociations(only, sources, listings, []), [], false), {'*.asm': 'sjasmplus', '*.inc': 'sjasmplus'});
+		assert.deepEqual(fixAssociations(only, findConflictingAssociations(only, sources, listings, ['z80-macroasm']), [], false), {'*.asm': 'sjasmplus', '*.inc': 'sjasmplus'});
 		// One left
 		const one = {'*.{asm,s}': 'z80-macroasm'};
-		assert.deepEqual(fixAssociations(one, findConflictingAssociations(one, sources, listings, []), [], false), {'*.s': 'z80-macroasm', '*.asm': 'sjasmplus'});
+		assert.deepEqual(fixAssociations(one, findConflictingAssociations(one, sources, listings, ['z80-macroasm']), [], false), {'*.s': 'z80-macroasm', '*.asm': 'sjasmplus'});
+	});
+
+	test('fix: a glob of an uninstalled language or with only filler left is removed', () => {
+		// NASM Code Lens is uninstalled
+		const user = {'*.asm': 'sjasmplus', [NASM_GLOB]: 'asm-z80-sjasmplus'};
+		const conflicts = findConflictingAssociations(user, sources, listings, ['sjasmplus']);
+		assert.deepEqual(fixAssociations(user, conflicts, [], false), {'*.asm': 'sjasmplus', '*.inc': 'sjasmplus'});
+		// Installed, but its extensions are all ours
+		const filler = {'*.{asm,inc,----------}': 'asm-z80-sjasmplus'};
+		assert.deepEqual(fixAssociations(filler, findConflictingAssociations(filler, sources, listings, ['asm-z80-sjasmplus']), [], false), {'*.asm': 'sjasmplus', '*.inc': 'sjasmplus'});
 	});
 
 	test('fix in the workspace: overrides the same keys of the user settings', () => {

@@ -1,5 +1,8 @@
 # Changelog
 
+## 0.1.10
+- Fixing file associations no longer leaves an entry like `"*.{s,-----…}": "asm-z80-sjasmplus"` behind when NASM Code Lens is not installed: what remains of its glob after `asm` and `inc` are taken out is removed too (it would only open `.s` files as plain text). The same if nothing but its filler of dashes remains. With NASM Code Lens installed the rest stays, it is its `.s` files. An entry that an earlier version left stays: remove it by hand if you don't use NASM Code Lens.
+
 ## 0.1.9
 - NASM Code Lens (ASM Code Lens 3.x) took the assembler files and the extension did nothing, without a word. On its first start it writes `"*.{asm,inc,s,nasm,yasm,-----…}": "asm-x86-nasm"` to `files.associations`; VS Code takes the longest matching entry, so it wins over `"*.asm": "sjasmplus"`, and after NASM Code Lens is uninstalled the files open as plain text. Globs of several extensions (`*.{asm,inc}`) are now recognized, and which entry wins is decided as in VS Code. The fix takes our file types out of such a glob where it is defined ("Everywhere") or overrides it in the workspace settings ("In this workspace"). The question also comes when a file opens in another language because of the settings, e.g. after another extension changed them.
 - Folding: an `IF` block (or any other block) with a label right below its first line folds again. The region of the label above ended on the `IF` line and the region of the label in the block went past `ENDIF`; VS Code drops a range that overlaps another without nesting, here the block. A label now folds up to the next label within the block it is in, and before a block it would not contain completely.

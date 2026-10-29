@@ -1,7 +1,7 @@
 {
     "name": "sjasmplus-code-lens",
     "displayName": "sjasmplus Code Lens",
-    "version": "0.1.9",
+    "version": "0.1.10",
     "publisher": "kolnogorov",
     "description": "Code lens, references, go to definition, rename, outline and hover for Z80 assembly written for sjasmplus.",
     "author": {

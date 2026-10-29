@@ -161,7 +161,8 @@ export function findCompetingLanguages(languages: ContributedLanguage[], associa
  * The value of "files.associations" in one settings scope (user or workspace)
  * that sends our file types to sjasmplus.
  * - A conflicting glob of this scope with several extensions loses ours, and
- *   "*.asm" etc. are added: a shorter glob would not win over it.
+ *   "*.asm" etc. are added: a shorter glob would not win over it. The glob is
+ *   removed if its language is not installed or nothing but filler is left.
  * - Other conflicting globs of this scope are associated with sjasmplus.
  * - With `override` (the workspace scope, which overrides the user settings), the
  *   same is done for globs of other scopes: the key is set here to sjasmplus.
@@ -183,7 +184,9 @@ export function fixAssociations(value: Associations | undefined, conflicts: Conf
 			const rest = glob.items.filter(item => !ours.has('.' + item.toLowerCase()));
 			const language = updated[pattern];
 			delete updated[pattern];
-			if (rest.length > 0)
+			// The rest stays for the other extension, unless it is uninstalled or the rest
+			// is only NASM Code Lens' filler that makes its glob the longest ("*.{s,-----}")
+			if (rest.some(item => !/^-+$/.test(item)) && !group[0].missing)
 				updated[glob.prefix + (rest.length > 1 ? '{' + rest.join(',') + '}' : rest[0])] = language;
 			for (const c of group)
 				updated[c.fixPattern] = c.target;
